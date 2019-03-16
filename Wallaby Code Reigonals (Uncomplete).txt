@@ -1,0 +1,234 @@
+﻿int diameter = 70;
+float wheelCircumference;
+float perDeg;
+int motorL;
+int motorSpeedL;
+int gmpcL;
+int motorR;
+int motorSpeedR;
+int gmpcR;
+int scooper;
+int scooperSpeed;
+int scooperGrab;
+int scooperDegree;
+int scooperLength;
+float scooperCircumference;
+int servoClaw;
+int blacklineSensor;
+int blacklineValueBlack;
+int blacklineValueBlue;
+int blacklineSpeedHigh;
+int blacklineSpeedLow;
+int touchSensor;
+int pickups;
+int pickupSpacing;
+void forward(int distance);
+void backward(int distance);
+void turn(string direction, int degrees);
+void forward_until_blackline(int triggercount);
+void line_follow(string side, string color, string trigger, float time);
+void scoop();
+float time(distance, circumference, speed);
+int main()
+{
+ shut_down_in(118);
+ //0.5 Set Variables
+  wheelCircumference = diameter * 3.14;
+  perDeg = wheelCircumference/360;
+  scooperCircumference = scooperLength * 3.14;
+ //1.0 Setup
+  enable_servos();
+  set_servo_position(scooper, 0);
+  set_servo_position(servoClaw, 0);
+  cmpc(motorL);
+  cmpc(motorR);
+  while(gmpc(motorR) < 500)
+  {
+   mav(motorL, motorSpeedL);
+   mav(motorR, motorSpeedR);
+  }
+  gmpcL = gmpc(motorL);
+  gmpcR = gmpc(motorR);
+  while(gmpc(motorR) < 1000)
+  {
+   mav(motorL, -motorSpeedL);
+   mav(motorR, -motorSpeedR);
+  }
+  if (gmpc(motorL) < gmpc(motorR))
+   motorSpeedR = motorSpeedR * (gmpc(motorL)/gmpc(motorR));
+  else
+   motorSpeedL = motorSpeedL * (gmpc(motorR)/gmpc(motorL));
+ //1.1 Position Wallaby
+  forward_until_trigger(2);
+  forward(20);
+  turn(left, 90);
+  line_follow(right, black, touch, 0);
+  backward(100);
+  turn(right, 90);
+ //1.2 Grab Blue Poms
+  forward_until_trigger(1);
+  for(i, i < pickups, i++)
+  {
+   if (motorSpeedL <= motorSpeedR)
+    line_follow(right, blue, time, time(pickupSpacing, wheelCircumference, motorSpeedL);
+   else
+    line_follow(right, blue, time, time(pickupSpacing, wheelCircumference, motorSpeedR);
+   scoop();
+  }
+
+
+ //1.3 Put Poms in Coupler
+ //1.4 Place Coupler in Scoring Zone
+}
+void forward(int distance)
+{
+ if (motorSpeedL <= motorSpeedR)
+  float time = time(distance, wheelCircumference, motorSpeedL);
+ else
+  float time = time(distance, wheelCircumference, motorSpeedR);
+ mav(motorL, motorSpeedL);
+ mav(motorR, motorSpeedR);
+ sleep(time);
+}
+void backward(int distance)
+{
+ motorSpeedL <= motorSpeedR)
+  float time = time(distance, wheelCircumference, motorSpeedL);
+ else
+  float time = time(distance, wheelCircumference, motorSpeedR);
+ mav(motorL, -motorSpeedL);
+ mav(motorR, -motorSpeedR);
+ sleep(time);
+}
+void turn(string direction, int degrees)
+{
+ float distance = degrees * perDeg;
+ if (motorSpeedL <= motorSpeedR)
+  float time = time(distance, wheelCircumference, motorSpeedL);
+ else
+  float time = time(distance, wheelCircumference, motorSpeedR);
+ if (direction = "left")
+ {
+  mav(motorL, -motorSpeedL);
+  mav(motorR, motorSpeedR);
+  sleep(time);
+ }
+ else
+ {
+  mav(motorL, motorSpeedL);
+  mav(motorR, -motorSpeedR);
+  sleep(time);
+ }
+}
+void forward_until_blackline(int triggercount)
+{
+ int i = 0;
+ bool senseObject;
+ if (analog(blacklineSensor) >= blacklineValue)
+  senseObject = true;
+ else
+  senseObject = false;
+ while (i < triggercount)
+ {
+  if ((senseObject == false) && (analog(blacklineSensor) >= blacklineValue))
+  {
+   i = i + 1;
+   senseObject = true;
+  }
+  else if ((senseObject == true) && (analog(blacklineSensor) < blacklineValue))
+  {
+   senseObject = false;
+  }
+  else
+  {
+   mav(motorL, motorSpeedL);
+   mav(motorR, motorSpeedR);
+  }
+ }
+}
+void line_follow(string side, string color, string trigger, int time)
+{
+ cmpc(motorL);
+ cmpc(motorR);
+ bool triggered = false;
+ while (triggered == false)
+ {
+  if ((trigger == "touch") && (digital(touchSensor) == 1))
+  {
+   triggered = true;
+  }
+  else if (trigger == "time")
+  {
+   if ((motorSpeedL <= motorSpeedR) && (gmpcL/(motorSpeedL/1400) > time))
+    triggered = true;
+   else if ((motorSpeedR <= motorSpeedL) && (gmpcR/(motorSpeedR/1400) > time))
+    triggered = true;
+  }
+  if ((color == "black") && (side == left))
+  {
+   if (analog(blacklineSensor) >= blacklineValueBlack)
+   {
+    mav(motorL, blacklineSpeedLow);
+    mav(motorR, blacklineSpeedHigh);
+   }
+   else
+   {
+    mav(motorL, blacklineSpeedHigh);
+    mav(motorR, blacklineSpeedLow);
+   }
+  }
+  else if (color == "black")
+  {
+   if (analog(blacklineSensor) >= blacklineValueBlack)
+   {
+    mav(motorL, blacklineSpeedHigh);
+    mav(motorR, blacklineSpeedLow);
+   }
+   else
+   {
+    mav(motorL, blacklineSpeedLow);
+    mav(motorR, blacklineSpeedHigh);
+   }
+  }
+  else if (side == left)
+  {
+   if (analog(blacklineSensor) >= blacklineValueBlue)
+   {
+    mav(motorL, blacklineSpeedLow);
+    mav(motorR, blacklineSpeedHigh);
+   }
+   else
+   {
+    mav(motorL, blacklineSpeedHigh);
+    mav(motorR, blacklineSpeedLow);
+   }
+  }
+  else
+  {
+   if (analog(blacklineSensor) >= blacklineValueBlue)
+   {
+    mav(motorL, blacklineSpeedHigh);
+    mav(motorR, blacklineSpeedLow);
+   }
+   else
+   {
+    mav(motorL, blacklineSpeedLow);
+    mav(motorR, blacklineSpeedHigh);
+   }
+  }
+ }
+}
+void scoop()
+{
+ float distance = (scooperDegree/360) * scooperCircumference;
+ float time = time(distance, scooperCircumference, scooperSpeed);
+ mav(scooper, scooperSpeed);
+ sleep(time);
+ mav(scooper, -scooperSpeed);
+ sleep(time);
+}
+float time(distance, circumference, speed)
+{
+ float time = distance/(circumference * (speed/1400));
+ return time;
+}
