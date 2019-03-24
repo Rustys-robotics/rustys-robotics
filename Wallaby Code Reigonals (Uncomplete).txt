@@ -1,4 +1,5 @@
-﻿int diameter = 70;
+//regionals code
+int diameter = 70;
 float wheelCircumference;
 float perDeg;
 int motorL;
