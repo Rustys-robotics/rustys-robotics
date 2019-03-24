@@ -140,7 +140,7 @@ int main() //with robot facing straight
 
  printf("Hello World\n");
  //wait_for_light(1);
-`
+`msleep(4000); //wait for Wallaby
 //Pick up the Firefighter on the black tape
 
 
